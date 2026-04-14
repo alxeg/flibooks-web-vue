@@ -1,4 +1,4 @@
-name: Build flibooks backend
+name: Build flibooks frontend
 
 on:
   push:
