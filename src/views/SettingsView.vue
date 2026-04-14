@@ -84,6 +84,7 @@ watch(tempTheme, (val) => {
         <v-chip-group
           v-model="tempLanguages"
           multiple
+          column
         >
           <v-chip
             v-for="lang in settingsStore.availableLanguages"
