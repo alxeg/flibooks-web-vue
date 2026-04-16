@@ -13,7 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['update:searchQuery', 'search'])
 
 const settingsStore = useSettingsStore()
-const { searchDeletedBooks, selectedLanguages } = storeToRefs(settingsStore)
+const { searchDeletedBooks, limitSearchResults, searchResultsLimit, selectedLanguages } = storeToRefs(settingsStore)
 
 const localQuery = computed({
   get: () => props.searchQuery,
@@ -21,13 +21,17 @@ const localQuery = computed({
 })
 
 const handleSearch = () => {
-  emit('search', {
+  const searchParams = {
     title: localQuery.value,
     author: localQuery.value,
     series: localQuery.value,
     deleted: searchDeletedBooks.value,
     langs: selectedLanguages.value.length > 0 ? selectedLanguages.value : undefined,
-  })
+  }
+  if (limitSearchResults.value) {
+    searchParams.limit = searchResultsLimit.value
+  }
+  emit('search', searchParams)
 }
 </script>
 

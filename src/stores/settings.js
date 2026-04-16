@@ -6,6 +6,8 @@ export const useSettingsStore = defineStore('settings', () => {
   // State
   const availableLanguages = ref([])
   const searchDeletedBooks = ref(false)
+  const limitSearchResults = ref(false)
+  const searchResultsLimit = ref(50)
   const selectedLanguages = ref([])
   const isLoadingLanguages = ref(false)
 
@@ -39,6 +41,14 @@ export const useSettingsStore = defineStore('settings', () => {
     searchDeletedBooks.value = value
   }
 
+  const updateLimitSearchResults = (value) => {
+    limitSearchResults.value = value
+  }
+
+  const updateSearchResultsLimit = (value) => {
+    searchResultsLimit.value = value
+  }
+
   const updateSelectedLanguages = (langs) => {
     selectedLanguages.value = langs
   }
@@ -62,6 +72,8 @@ export const useSettingsStore = defineStore('settings', () => {
       try {
         const parsed = JSON.parse(saved)
         searchDeletedBooks.value = parsed.searchDeletedBooks ?? false
+        limitSearchResults.value = parsed.limitSearchResults ?? false
+        searchResultsLimit.value = parsed.searchResultsLimit ?? 50
         selectedLanguages.value = parsed.selectedLanguages ?? []
       } catch (e) {
         console.error('Failed to parse saved settings:', e)
@@ -72,6 +84,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const saveToStorage = () => {
     localStorage.setItem('flibooks-settings', JSON.stringify({
       searchDeletedBooks: searchDeletedBooks.value,
+      limitSearchResults: limitSearchResults.value,
+      searchResultsLimit: searchResultsLimit.value,
       selectedLanguages: selectedLanguages.value,
     }))
   }
@@ -85,6 +99,8 @@ export const useSettingsStore = defineStore('settings', () => {
     // State
     availableLanguages,
     searchDeletedBooks,
+    limitSearchResults,
+    searchResultsLimit,
     selectedLanguages,
     isLoadingLanguages,
 
@@ -94,6 +110,8 @@ export const useSettingsStore = defineStore('settings', () => {
     // Actions
     loadLanguages,
     updateSearchDeletedBooks,
+    updateLimitSearchResults,
+    updateSearchResultsLimit,
     updateSelectedLanguages,
     toggleLanguage,
     setSelectedLanguages,

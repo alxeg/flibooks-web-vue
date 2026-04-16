@@ -2,12 +2,16 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { searchAuthors } from '../api'
+import { useSettingsStore } from '../stores/settings'
 import { useSearchStore } from '../stores/search'
+import { storeToRefs } from 'pinia'
 import SearchBar from '../components/SearchBar.vue'
 import HighlightText from '../components/HighlightText.vue'
 
 const router = useRouter()
+const settingsStore = useSettingsStore()
 const searchStore = useSearchStore()
+const { limitSearchResults, searchResultsLimit } = storeToRefs(settingsStore)
 
 const searchQuery = computed({
   get: () => searchStore.authorSearchQuery,
@@ -30,10 +34,13 @@ const handleSearch = async (searchParams) => {
   loading.value = true
   error.value = null
   try {
-    const response = await searchAuthors({
+    const params = {
       author: searchParams.author,
-      limit: 50,
-    })
+    }
+    if (limitSearchResults.value) {
+      params.limit = searchResultsLimit.value
+    }
+    const response = await searchAuthors(params)
     searchResults.value = response
     searchStore.saveAll()
   } catch (err) {
@@ -64,8 +71,6 @@ onUnmounted(() => {
   <div>
     <SearchBar
       v-model:search-query="searchQuery"
-      :show-search-deleted="false"
-      :show-languages="false"
       @search="handleSearch"
     />
 

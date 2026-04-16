@@ -6,20 +6,34 @@ import { storeToRefs } from 'pinia'
 
 const settingsStore = useSettingsStore()
 const themeStore = useThemeStore()
-const { searchDeletedBooks, selectedLanguages } = storeToRefs(settingsStore)
+const { searchDeletedBooks, limitSearchResults, searchResultsLimit, selectedLanguages } = storeToRefs(settingsStore)
 
 const tempDeletedBooks = ref(false)
+const tempLimitSearchResults = ref(false)
+const tempSearchResultsLimit = ref(50)
 const tempLanguages = ref([])
 const tempTheme = ref('system')
 
 onMounted(() => {
   tempDeletedBooks.value = searchDeletedBooks.value
+  tempLimitSearchResults.value = limitSearchResults.value
+  tempSearchResultsLimit.value = searchResultsLimit.value
   tempLanguages.value = [...selectedLanguages.value]
   tempTheme.value = themeStore.theme
 })
 
 watch(tempDeletedBooks, (val) => {
   settingsStore.updateSearchDeletedBooks(val)
+  settingsStore.saveToStorage()
+})
+
+watch(tempLimitSearchResults, (val) => {
+  settingsStore.updateLimitSearchResults(val)
+  settingsStore.saveToStorage()
+})
+
+watch(tempSearchResultsLimit, (val) => {
+  settingsStore.updateSearchResultsLimit(val)
   settingsStore.saveToStorage()
 })
 
@@ -69,6 +83,29 @@ watch(tempTheme, (val) => {
           color="primary"
           inset
         ></v-switch>
+      </v-card-text>
+    </v-card>
+
+    <!-- Limit Search Results Option -->
+    <v-card class="mb-4">
+      <v-card-text class="d-flex align-center">
+        <v-switch
+          v-model="tempLimitSearchResults"
+          label="Limit search results"
+          color="primary"
+          inset
+          class="me-4"
+        ></v-switch>
+        <v-text-field
+          v-model="tempSearchResultsLimit"
+          type="number"
+          label="Maximum results"
+          variant="outlined"
+          density="compact"
+          :disabled="!tempLimitSearchResults"
+          min="1"
+          style="width: 120px"
+        ></v-text-field>
       </v-card-text>
     </v-card>
 

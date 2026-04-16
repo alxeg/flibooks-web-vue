@@ -11,7 +11,7 @@ import HighlightText from '../components/HighlightText.vue'
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const searchStore = useSearchStore()
-const { searchDeletedBooks, selectedLanguages } = storeToRefs(settingsStore)
+const { searchDeletedBooks, limitSearchResults, searchResultsLimit, selectedLanguages } = storeToRefs(settingsStore)
 
 const searchTitle = computed({
   get: () => searchStore.bookSearchTitle,
@@ -44,13 +44,16 @@ const handleSearch = async () => {
   loading.value = true
   error.value = null
   try {
-    const response = await searchBooks({
+    const params = {
       title: searchTitle.value,
       author: searchAuthor.value,
       deleted: searchDeletedBooks.value,
       langs: selectedLanguages.value.length > 0 ? selectedLanguages.value : undefined,
-      limit: 50,
-    })
+    }
+    if (limitSearchResults.value) {
+      params.limit = searchResultsLimit.value
+    }
+    const response = await searchBooks(params)
     searchResults.value = response
     searchStore.saveAll()
   } catch (err) {
