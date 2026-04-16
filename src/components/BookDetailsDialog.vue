@@ -120,13 +120,13 @@ const handleClose = () => {
 </script>
 
 <template>
-  <v-dialog
-    v-model="dialog"
-    max-width="600px"
-    @click:outside="handleClose"
-  >
+   <v-dialog
+      v-model="dialog"
+      max-width="600px"
+      @click:outside="handleClose"
+    >
     <v-card v-if="book">
-      <v-card-title class="text-h5">
+      <v-card-title class="text-h5" style="white-space: normal; word-wrap: break-word;">
         {{ book.title }}
       </v-card-title>
       <v-card-subtitle class="pt-2">

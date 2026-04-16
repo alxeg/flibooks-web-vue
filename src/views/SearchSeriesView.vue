@@ -192,12 +192,14 @@ const formatFileSize = (size) => {
                     <v-list-item-title class="mb-1">
                       <HighlightText :text="book.title" :highlight="searchStore.seriesSearchTitle" />
                     </v-list-item-title>
-                    <v-list-item-subtitle v-if="book.authors?.length" class="text-caption">
-                      {{ book.authors.map(a => a.name).join(', ') }}
-                    </v-list-item-subtitle>
-                    <v-list-item-subtitle v-if="book.series" class="text-caption">
-                      <HighlightText :text="book.series" :highlight="searchStore.seriesSearchName" /> {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}}
-                    </v-list-item-subtitle>
+                    <div class="d-flex align-center flex-wrap justify-space-between">
+                      <v-list-item-subtitle v-if="book.authors?.length" class="text-caption flex-grow-1">
+                        {{ book.authors.map(a => a.name).join(', ') }}
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle v-if="book.series" class="text-caption flex-shrink-0 ml-3">
+                        <HighlightText :text="book.series" :highlight="searchStore.seriesSearchName" /> {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}}
+                      </v-list-item-subtitle>
+                    </div>
                   </div>
                 </v-col>
                 <v-col cols="2" class="d-flex justify-end px-2">
