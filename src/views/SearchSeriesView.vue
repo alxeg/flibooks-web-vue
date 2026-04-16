@@ -39,6 +39,17 @@ const selectedBookIds = ref([])
 
 const getBookId = (book) => book.ID || book.lib_id || book.id
 
+const allSelected = computed({
+  get: () => searchResults.value.length > 0 && selectedBookIds.value.length === searchResults.value.length,
+  set: (selectAll) => {
+    if (selectAll) {
+      selectedBookIds.value = [...new Set([...selectedBookIds.value, ...searchResults.value.map(getBookId)])]
+    } else {
+      selectedBookIds.value = []
+    }
+  },
+})
+
 const toggleBookSelection = (bookId) => {
   const index = selectedBookIds.value.indexOf(bookId)
   if (index > -1) {
@@ -63,6 +74,10 @@ const downloadSelected = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+const toggleAllBooks = () => {
+  allSelected.value = !allSelected.value
 }
 
 const handleDownloadFb2 = (bookId) => {
@@ -176,6 +191,24 @@ const formatFileSize = (size) => {
 
       <v-card-text v-else>
         <v-list>
+          <!-- Select All Header -->
+          <v-list-item class="pa-0">
+            <v-row align="center" no-gutters class="w-100">
+              <v-col cols="1" class="d-flex justify-start px-2">
+                <v-checkbox-btn
+                  :model-value="allSelected"
+                  @update:model-value="toggleAllBooks"
+                  indeterminate
+                ></v-checkbox-btn>
+              </v-col>
+              <v-col cols="11" class="pl-2">
+                <v-list-item-title>Select All</v-list-item-title>
+              </v-col>
+            </v-row>
+          </v-list-item>
+          <v-divider></v-divider>
+
+          <!-- Individual Items -->
           <template v-for="book in searchResults" :key="getBookId(book)">
             <v-list-item
               @click="handleBookClick(book)"

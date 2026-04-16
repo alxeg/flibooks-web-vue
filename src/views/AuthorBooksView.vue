@@ -20,12 +20,15 @@ const authorId = computed(() => Number(props.id))
 
 const author = ref(null)
 const allBooks = ref([])
-const filteredBooks = computed(() => {
-  if (!searchQuery.value) return allBooks.value
-  const query = searchQuery.value.toLowerCase()
-  return allBooks.value.filter(book => 
-    book.title && book.title.toLowerCase().includes(query)
-  )
+const filteredBooks = computed({
+  get: () => {
+    if (!searchQuery.value) return allBooks.value
+    const query = searchQuery.value.toLowerCase()
+    return allBooks.value.filter(book =>
+      book.title && book.title.toLowerCase().includes(query)
+    )
+  },
+  set: (val) => { allBooks.value = val }
 })
 const loading = ref(false)
 const error = ref(null)
@@ -34,7 +37,22 @@ const showDialog = ref(false)
 const selectedBookId = ref(null)
 const selectedBookIds = ref([])
 
+const allSelected = computed({
+  get: () => filteredBooks.value.length > 0 && selectedBookIds.value.length === filteredBooks.value.length,
+  set: (selectAll) => {
+    if (selectAll) {
+      selectedBookIds.value = [...new Set([...selectedBookIds.value, ...filteredBooks.value.map(getBookId)])]
+    } else {
+      selectedBookIds.value = []
+    }
+  },
+})
+
 const getBookId = (book) => book.ID || book.lib_id || book.id
+
+const toggleAllBooks = () => {
+  allSelected.value = !allSelected.value
+}
 
 const loadAuthor = async () => {
   try {
@@ -158,6 +176,24 @@ onUnmounted(() => {
 
       <v-card-text v-else>
         <v-list>
+          <!-- Select All Header -->
+          <v-list-item class="pa-0">
+            <v-row align="center" no-gutters class="w-100">
+              <v-col cols="1" class="d-flex justify-start px-2">
+                <v-checkbox-btn
+                  :model-value="allSelected"
+                  @update:model-value="toggleAllBooks"
+                  indeterminate
+                ></v-checkbox-btn>
+              </v-col>
+              <v-col cols="11" class="pl-2">
+                <v-list-item-title>Select All</v-list-item-title>
+              </v-col>
+            </v-row>
+          </v-list-item>
+          <v-divider></v-divider>
+
+          <!-- Individual Items -->
           <template v-for="book in filteredBooks" :key="getBookId(book)">
             <v-list-item
               @click="handleBookClick(book)"
