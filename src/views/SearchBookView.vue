@@ -201,7 +201,7 @@ onUnmounted(() => {
                       <HighlightText :text="book.authors?.map(a => a.name).join(', ') || 'Unknown author'" :highlight="searchStore.bookSearchAuthor" />
                     </v-list-item-subtitle>
                     <v-list-item-subtitle v-if="book.series" class="text-caption">
-                      <HighlightText :text="book.series" :highlight="searchStore.bookSearchTitle" /> ({{ book.ser_no || '?' }})
+                      <HighlightText :text="book.series" :highlight="searchStore.bookSearchTitle" /> {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}}
                     </v-list-item-subtitle>
                   </div>
                 </v-col>

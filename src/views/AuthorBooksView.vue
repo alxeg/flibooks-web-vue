@@ -195,11 +195,11 @@ onUnmounted(() => {
                       <HighlightText :text="book.title" :highlight="searchStore.bookSearchTitle" />
                     </v-list-item-title>
                     <v-list-item-subtitle v-if="book.series" class="text-caption">
-                      <HighlightText :text="book.series" :highlight="searchStore.bookSearchTitle" /> ({{ book.ser_no || '?' }})
+                      <HighlightText :text="book.series" :highlight="searchStore.bookSearchTitle" /> {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}}
                     </v-list-item-subtitle>
-                    <v-list-item-subtitle v-else class="text-caption">
-                      {{ book.lang ? 'Language: ' + book.lang : '' }}
-                    </v-list-item-subtitle>
+                    <!-- <v-list-item-subtitle v-else class="text-caption">
+                      {{ book.lang ? '' + book.lang : '' }}
+                    </v-list-item-subtitle> -->
                   </div>
                 </v-col>
                 <v-col cols="2" class="d-flex justify-end px-2">

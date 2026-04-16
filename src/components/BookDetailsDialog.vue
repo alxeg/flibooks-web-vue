@@ -139,29 +139,25 @@ const handleClose = () => {
 
       <v-card-text v-else>
         <v-list dense>
-          <v-list-item>
+          <v-list-item v-if="book.series || book.ser_no">
             <v-list-item-title>Series</v-list-item-title>
-            <v-list-item-subtitle>{{ book.series || 'N/A' }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Language</v-list-item-title>
-            <v-list-item-subtitle>{{ book.lang || 'N/A' }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ book.series || 'N/A' }} {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}} </v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
             <v-list-item-title>File size</v-list-item-title>
             <v-list-item-subtitle>{{ formatFileSize(book.file_size) }}</v-list-item-subtitle>
           </v-list-item>
-          <v-list-item>
+          <!-- <v-list-item>
             <v-list-item-title>Library ID</v-list-item-title>
             <v-list-item-subtitle>{{ book.lib_id }}</v-list-item-subtitle>
-          </v-list-item>
+          </v-list-item> -->
           <v-list-item>
             <v-list-item-title>Genres</v-list-item-title>
             <v-list-item-subtitle>{{ genresText || 'N/A' }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
-            <v-list-item-title>File extension</v-list-item-title>
-            <v-list-item-subtitle>{{ book.ext || 'N/A' }}</v-list-item-subtitle>
+            <v-list-item-title>Language</v-list-item-title>
+            <v-list-item-subtitle>{{ book.lang || 'N/A' }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
             <v-list-item-title>Deleted</v-list-item-title>
