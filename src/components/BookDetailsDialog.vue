@@ -130,7 +130,7 @@ const handleClose = () => {
         {{ book.title }}
       </v-card-title>
       <v-card-subtitle class="pt-2">
-        by {{ authorsText }}
+        {{ authorsText }}
       </v-card-subtitle>
 
       <v-card-text v-if="loading">

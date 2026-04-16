@@ -19,7 +19,14 @@ const searchStore = useSearchStore()
 const authorId = computed(() => Number(props.id))
 
 const author = ref(null)
-const books = ref([])
+const allBooks = ref([])
+const filteredBooks = computed(() => {
+  if (!searchQuery.value) return allBooks.value
+  const query = searchQuery.value.toLowerCase()
+  return allBooks.value.filter(book => 
+    book.title && book.title.toLowerCase().includes(query)
+  )
+})
 const loading = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
@@ -28,28 +35,6 @@ const selectedBookId = ref(null)
 const selectedBookIds = ref([])
 
 const getBookId = (book) => book.ID || book.lib_id || book.id
-
-const handleSearch = async () => {
-  loading.value = true
-  error.value = null
-  try {
-    books.value = await getAuthorBooksBySearch(authorId.value, {
-      title: searchQuery.value,
-      author: searchQuery.value,
-    }, { 'no-details': true })
-    searchStore.saveAll()
-  } catch (err) {
-    error.value = err.response?.data || 'Search failed'
-    console.error('Search books error:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleClearSearch = () => {
-  searchQuery.value = ''
-  loadBooks()
-}
 
 const loadAuthor = async () => {
   try {
@@ -62,7 +47,7 @@ const loadAuthor = async () => {
 const loadBooks = async () => {
   loading.value = true
   try {
-    books.value = await getAuthorBooks(authorId.value, { 'no-details': true })
+    allBooks.value = await getAuthorBooks(authorId.value, { 'no-details': true })
   } catch (err) {
     error.value = err.response?.data || 'Failed to load books'
     console.error('Load books error:', err)
@@ -146,10 +131,8 @@ onUnmounted(() => {
         <v-text-field
           v-model="searchQuery"
           variant="solo-filled"
-          placeholder="Search within author's books..."
-          @keyup.enter="handleSearch"
+          placeholder="Filter by title..."
           clearable
-          @click:clear="handleClearSearch"
           density="compact"
         ></v-text-field>
       </v-card-text>
@@ -166,7 +149,7 @@ onUnmounted(() => {
         </v-alert>
       </v-card-text>
 
-      <v-card-text v-else-if="books.length === 0">
+      <v-card-text v-else-if="filteredBooks.length === 0">
         <v-alert type="info" variant="toned">
           <span v-if="searchQuery">No books found for "{{ searchQuery }}"</span>
           <span v-else>No books found for this author</span>
@@ -175,7 +158,7 @@ onUnmounted(() => {
 
       <v-card-text v-else>
         <v-list>
-          <template v-for="book in books" :key="getBookId(book)">
+          <template v-for="book in filteredBooks" :key="getBookId(book)">
             <v-list-item
               @click="handleBookClick(book)"
               link
