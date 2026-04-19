@@ -43,9 +43,16 @@ export const getAuthorBooks = async (authorId, params = {}) => {
   return response.data
 }
 
-// Get author's books with search filter
+// Get author's books with search filter (old endpoint)
 export const getAuthorBooksBySearch = async (authorId, searchParams, params = {}) => {
   const response = await api.post(`/author/${authorId}/books`, searchParams, { params })
+  return response.data
+}
+
+// List author's books via POST /api/author/books
+// authorId must be passed as string field 'author' in payload
+export const listAuthorBooks = async (searchParams) => {
+  const response = await api.post('/author/books', searchParams)
   return response.data
 }
 

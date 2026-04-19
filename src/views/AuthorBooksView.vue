@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuthor, getAuthorBooksBySearch } from '../api'
+import { getAuthor, listAuthorBooks } from '../api'
 import { useSearchStore } from '../stores/search'
 import { useSettingsStore } from '../stores/settings'
 import { storeToRefs } from 'pinia'
@@ -70,13 +70,14 @@ const loadBooks = async () => {
   loading.value = true
   try {
     const payload = {
+      author: String(authorId.value),
       deleted: searchDeletedBooks.value,
       langs: selectedLanguages.value.length > 0 ? selectedLanguages.value : undefined,
     }
     if (limitSearchResults.value) {
       payload.limit = searchResultsLimit.value
     }
-    allBooks.value = await getAuthorBooksBySearch(authorId.value, payload, { 'no-details': true })
+    allBooks.value = await listAuthorBooks(payload)
   } catch (err) {
     error.value = err.response?.data || 'Failed to load books'
     console.error('Load books error:', err)
