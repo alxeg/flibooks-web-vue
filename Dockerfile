@@ -1,4 +1,5 @@
 ARG BACKEND_BASE_IMAGE
+ARG BACKEND_API_VERSION
 
 FROM node:24-alpine AS build
 
@@ -7,7 +8,7 @@ WORKDIR     /build
 ADD         . /build
 
 RUN npm i && \
-    npm run build
+    VITE_API_VERSION=${BACKEND_API_VERSION} npm run build
 
 FROM ${BACKEND_BASE_IMAGE}
 
