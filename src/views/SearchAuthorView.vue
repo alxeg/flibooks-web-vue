@@ -51,9 +51,12 @@ const handleSearch = async (searchParams) => {
   }
 }
 
-const getAuthorId = (author) => author.ID || author.lib_id || author.id
+const getAuthorId = (author) => author.ID || author.name
 
 const handleAuthorClick = (author) => {
+  // Store author info for v2 API (which uses author name instead of ID)
+  searchStore.setCurrentAuthorId(getAuthorId(author))
+  searchStore.setCurrentAuthorName(author.name)
   searchStore.saveAll()
   router.push(`/authors/${getAuthorId(author)}`)
 }

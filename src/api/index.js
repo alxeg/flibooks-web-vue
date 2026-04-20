@@ -1,4 +1,10 @@
 import axios from 'axios'
+import {
+  normalizeAuthor,
+  normalizeAuthors,
+  normalizeBook,
+  normalizeBooks
+} from './adapters'
 
 const api = axios.create({
   baseURL: '/api',
@@ -6,6 +12,9 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Determine API version from environment (default to v1)
+const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1'
 
 // Get available languages
 export const getLangs = async () => {
@@ -16,38 +25,41 @@ export const getLangs = async () => {
 // Search books
 export const searchBooks = async (searchParams) => {
   const response = await api.post('/book/search', searchParams)
-  return response.data
+  return normalizeBooks(response.data)
 }
 
 // Search series
 export const searchSeries = async (searchParams) => {
   const response = await api.post('/book/series', searchParams)
-  return response.data
+  // V2 returns wrapped format, normalize to unified format
+  return normalizeBooks(response.data)
 }
 
 // Search authors
 export const searchAuthors = async (searchParams) => {
   const response = await api.post('/author/search', searchParams)
-  return response.data
+  // V2 returns array of author names (strings), v1 returns author objects
+  return normalizeAuthors(response.data)
 }
 
-// Get author by ID
+// Get author by ID (v1 only - v2 doesn't have this endpoint)
 export const getAuthor = async (authorId) => {
   const response = await api.get(`/author/${authorId}`)
-  return response.data
+  return normalizeAuthor(response.data)
 }
 
 // List author's books via POST /api/author/books
-// authorId must be passed as string field 'author' in payload
+// For v1: author is passed as numeric ID in 'author' field
+// For v2: author is passed as author name in 'author' field
 export const listAuthorBooks = async (searchParams) => {
   const response = await api.post('/author/books', searchParams)
-  return response.data
+  return normalizeBooks(response.data)
 }
 
 // Get book by ID
 export const getBook = async (bookId) => {
   const response = await api.get(`/book/${bookId}`)
-  return response.data
+  return normalizeBook(response.data)
 }
 
 // Download book
@@ -67,5 +79,8 @@ export const downloadBooksArchive = async (bookIds) => {
   })
   return response
 }
+
+// Export API version for use in views
+export { API_VERSION }
 
 export default api

@@ -37,7 +37,7 @@ const showDialog = ref(false)
 const selectedBookId = ref(null)
 const selectedBookIds = ref([])
 
-const getBookId = (book) => book.ID || book.lib_id || book.id
+const getBookId = (book) => book.id
 
 const allSelected = computed({
   get: () => searchResults.value.length > 0 && selectedBookIds.value.length === searchResults.value.length,
@@ -230,7 +230,7 @@ const formatFileSize = (size) => {
                     </v-list-item-title>
                     <div class="d-flex align-center flex-wrap justify-space-between">
                       <v-list-item-subtitle v-if="book.authors?.length" class="text-caption flex-grow-1">
-                        {{ book.authors.map(a => a.name).join(', ') }}
+                        {{ book.authors.join(', ') }}
                       </v-list-item-subtitle>
                       <v-list-item-subtitle v-if="book.series" class="text-caption flex-shrink-0 ml-3">
                         <HighlightText :text="book.series" :highlight="searchStore.seriesSearchName" /> {{ book.ser_no ? '[ '+book.ser_no+' ]' : ''}}

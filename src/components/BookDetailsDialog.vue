@@ -105,12 +105,12 @@ const downloadFile = (response, filename) => {
 
 const authorsText = computed(() => {
   if (!book.value?.authors) return ''
-  return book.value.authors.map(a => a.name).join(', ')
+  return book.value.authors.join(', ')
 })
 
 const genresText = computed(() => {
   if (!book.value?.genres) return ''
-  return book.value.genres.map(g => g.genre_code).join(', ')
+  return book.value.genres.join(', ')
 })
 
 const handleClose = () => {

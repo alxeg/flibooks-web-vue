@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuthor, listAuthorBooks } from '../api'
+import { getAuthor, listAuthorBooks, API_VERSION } from '../api'
 import { useSearchStore } from '../stores/search'
 import { useSettingsStore } from '../stores/settings'
 import { storeToRefs } from 'pinia'
@@ -52,25 +52,22 @@ const allSelected = computed({
   },
 })
 
-const getBookId = (book) => book.ID || book.lib_id || book.id
+const getBookId = (book) => book.id
 
 const toggleAllBooks = () => {
   allSelected.value = !allSelected.value
 }
 
 const loadAuthor = async () => {
-  try {
-    author.value = await getAuthor(authorId.value)
-  } catch (err) {
-    console.error('Failed to load author:', err)
-  }
+  author.value = { name: searchStore.currentAuthorName }
 }
 
 const loadBooks = async () => {
   loading.value = true
   try {
+    // For v2 API, use author name from store instead of ID
     const payload = {
-      author: String(authorId.value),
+      author: API_VERSION === 'v1' ? String(authorId.value) : searchStore.currentAuthorName,
       deleted: searchDeletedBooks.value,
       langs: selectedLanguages.value.length > 0 ? selectedLanguages.value : undefined,
     }

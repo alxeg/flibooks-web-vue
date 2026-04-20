@@ -22,6 +22,10 @@ export const useSearchStore = defineStore('search', () => {
   const seriesLoading = ref(false)
   const seriesError = ref(null)
 
+  // Current author info (for v2 API which uses author name instead of ID)
+  const currentAuthorId = ref(null)
+  const currentAuthorName = ref('')
+
   // Actions - Author search
   const setAuthorSearchQuery = (query) => {
     authorSearchQuery.value = query
@@ -90,6 +94,18 @@ export const useSearchStore = defineStore('search', () => {
     seriesError.value = null
   }
 
+  // Actions - Current author (for v2 API)
+  const setCurrentAuthorId = (id) => {
+    currentAuthorId.value = id
+  }
+  const setCurrentAuthorName = (name) => {
+    currentAuthorName.value = name
+  }
+  const clearCurrentAuthor = () => {
+    currentAuthorId.value = null
+    currentAuthorName.value = ''
+  }
+
   // Persist and restore
   const saveAll = () => {
     localStorage.setItem('flibooks-search-author', JSON.stringify({
@@ -105,6 +121,10 @@ export const useSearchStore = defineStore('search', () => {
       title: seriesSearchTitle.value,
       name: seriesSearchName.value,
       results: seriesSearchResults.value,
+    }))
+    localStorage.setItem('flibooks-current-author', JSON.stringify({
+      id: currentAuthorId.value,
+      name: currentAuthorName.value,
     }))
   }
 
@@ -133,6 +153,13 @@ export const useSearchStore = defineStore('search', () => {
       seriesSearchName.value = parsed.name || ''
       seriesSearchResults.value = parsed.results || []
       // Don't restore loading state
+    }
+
+    const savedCurrentAuthor = localStorage.getItem('flibooks-current-author')
+    if (savedCurrentAuthor) {
+      const parsed = JSON.parse(savedCurrentAuthor)
+      currentAuthorId.value = parsed.id || null
+      currentAuthorName.value = parsed.name || ''
     }
   }
 
@@ -173,6 +200,13 @@ export const useSearchStore = defineStore('search', () => {
     setSeriesLoading,
     setSeriesError,
     clearSeriesSearch,
+
+    // Current author info (for v2 API)
+    currentAuthorId,
+    currentAuthorName,
+    setCurrentAuthorId,
+    setCurrentAuthorName,
+    clearCurrentAuthor,
 
     saveAll,
     restore,
