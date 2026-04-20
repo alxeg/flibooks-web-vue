@@ -51,7 +51,8 @@ jobs:
           push: ${{ github.event.inputs.push_image == 'true' }}
           build-args: |
             BACKEND_BASE_IMAGE=${{ secrets.HARBOR_REGISTRY_URL }}/${{ github.event.inputs.backend_image || 'lab/flibooks:latest' }}
-            BACKEND_API_VERSION=${{ ${{ github.event.inputs.backend_api_ver || 'v1' }}
+            BACKEND_API_VERSION=${{ github.event.inputs.backend_api_ver || 'v1' }}
+
           tags: |
             ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:latest
             ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:${{ github.run_number }}
