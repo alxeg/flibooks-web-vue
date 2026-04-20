@@ -42,7 +42,7 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event.inputs.push_image == 'true' }}
           build-args: |
-            BACKEND_BASE_IMAGE=${{ secrets.HARBOR_REGISTRY_URL }}/${{ github.event.inputs.backend_image }}
+            BACKEND_BASE_IMAGE=${{ secrets.HARBOR_REGISTRY_URL }}/${{ github.event.inputs.backend_image || 'lab/flibooks:latest' }}
           tags: |
             ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:latest
             ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:${{ github.run_number }}
