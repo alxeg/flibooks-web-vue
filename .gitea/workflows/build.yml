@@ -39,7 +39,7 @@ jobs:
       - name: Registry login
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          registry: ${{ vars.HARBOR_REGISTRY_URL }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
@@ -50,13 +50,13 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event.inputs.push_image == 'true' }}
           build-args: |
-            BACKEND_BASE_IMAGE=${{ secrets.HARBOR_REGISTRY_URL }}/${{ github.event.inputs.backend_image || 'lab/flibooks:latest' }}
+            BACKEND_BASE_IMAGE=${{ vars.HARBOR_REGISTRY_URL }}/${{ github.event.inputs.backend_image || 'lab/flibooks:latest' }}
             BACKEND_API_VERSION=${{ github.event.inputs.backend_api_ver || 'v1' }}
 
           tags: |
-            ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:latest
-            ${{ secrets.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:${{ github.run_number }}
+            ${{ vars.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:${{ github.event.inputs.backend_api_ver || 'v1' }}-latest
+            ${{ vars.HARBOR_REGISTRY_URL }}/lab/flibooks-ui:${{ github.event.inputs.backend_api_ver || 'v1' }}-${{ github.run_number }}
 
       - name: Registry logout
         if: always()
-        run: docker logout ${{ secrets.HARBOR_REGISTRY_URL }}
+        run: docker logout ${{ vars.HARBOR_REGISTRY_URL }}
