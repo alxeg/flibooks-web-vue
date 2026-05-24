@@ -36,12 +36,16 @@ const tabs = [
   { title: 'By Series', value: 2 },
   { title: 'Settings', value: 'settings' },
 ]
+
+const apiVersion = import.meta.env.VITE_API_VERSION || 'v1'
 </script>
 
 <template>
   <v-app :theme="theme">
     <v-app-bar color="primary" dense>
       <v-toolbar-title class="text-h6">Flibooks</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <span class="text-caption text-white-50 pe-2">API: {{ apiVersion }}</span>
     </v-app-bar>
 
     <v-main>

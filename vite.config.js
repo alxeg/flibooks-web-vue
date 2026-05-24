@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
 
 // Determine API version from environment (default to v1)
 const API_VERSION = process.env.VITE_API_VERSION || 'v1'
