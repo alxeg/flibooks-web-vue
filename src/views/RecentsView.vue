@@ -45,6 +45,7 @@ const removeBook = (bookId, event) => {
       const recentsList = JSON.parse(saved)
       const filtered = recentsList.filter(item => item.id !== bookId)
       localStorage.setItem('flibooks-recents', JSON.stringify(filtered))
+      localStorage.removeItem(`flibooks-progress-${bookId}`)
       loadRecents()
     }
   } catch (error) {
