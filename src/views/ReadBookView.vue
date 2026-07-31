@@ -42,6 +42,7 @@ const bookId = ref(route.query.bookId)
 const bookData = ref(null)
 const foliateView = ref(null)
 const loading = ref(true)
+const canGoBack = ref(false)
 
 const readViewStyle = computed(() => {
   const preset = BACKGROUND_PRESETS[readerBackground.value]
@@ -113,9 +114,19 @@ const loadBookWithFoliate = async () => {
 
     view.addEventListener('relocate', handleRelocate)
     view.addEventListener('load', handleLoad)
+    view.history.addEventListener('index-change', handleHistoryChange)
+    handleHistoryChange()
   } catch (error) {
     console.error('Failed to load book with Foliate:', error)
   }
+}
+
+const handleHistoryChange = () => {
+  canGoBack.value = !!foliateView.value?.history?.canGoBack
+}
+
+const goBack = () => {
+  foliateView.value?.history?.back()
 }
 
 const goPrev = () => {
@@ -185,6 +196,7 @@ const handleBeforeUnload = () => {
   if (foliateView.value) {
     foliateView.value.removeEventListener('relocate', handleRelocate)
     foliateView.value.removeEventListener('load', handleLoad)
+    foliateView.value.history.removeEventListener('index-change', handleHistoryChange)
   }
 }
 
@@ -223,6 +235,15 @@ watch([readerFontFamily, readerFontSize, readerBackground], applyReaderStyles)
       ref="foliateView"
       class="foliate-view"
     ></foliate-view>
+
+    <v-btn
+      v-if="!loading && canGoBack"
+      icon="mdi-arrow-left-top"
+      class="back-button"
+      variant="tonal"
+      title="Back to where you left off"
+      @click="goBack"
+    ></v-btn>
 
     <v-btn
       v-if="!loading"
@@ -275,5 +296,12 @@ watch([readerFontFamily, readerFontSize, readerBackground], applyReaderStyles)
 
 .nav-button-right {
   right: 8px;
+}
+
+.back-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
 }
 </style>
