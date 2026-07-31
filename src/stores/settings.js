@@ -10,6 +10,9 @@ export const useSettingsStore = defineStore('settings', () => {
   const searchResultsLimit = ref(50)
   const selectedLanguages = ref([])
   const isLoadingLanguages = ref(false)
+  const readerFontFamily = ref('default')
+  const readerFontSize = ref(100)
+  const readerBackground = ref('default')
 
   // Derived state
   const languagesOptions = computed(() => {
@@ -65,6 +68,18 @@ export const useSettingsStore = defineStore('settings', () => {
     selectedLanguages.value = langs
   }
 
+  const updateReaderFontFamily = (value) => {
+    readerFontFamily.value = value
+  }
+
+  const updateReaderFontSize = (value) => {
+    readerFontSize.value = value
+  }
+
+  const updateReaderBackground = (value) => {
+    readerBackground.value = value
+  }
+
   // Persist state to localStorage
   const loadFromStorage = () => {
     const saved = localStorage.getItem('flibooks-settings')
@@ -75,6 +90,9 @@ export const useSettingsStore = defineStore('settings', () => {
         limitSearchResults.value = parsed.limitSearchResults ?? false
         searchResultsLimit.value = parsed.searchResultsLimit ?? 50
         selectedLanguages.value = parsed.selectedLanguages ?? []
+        readerFontFamily.value = typeof parsed.readerFontFamily === 'string' ? parsed.readerFontFamily : 'default'
+        readerFontSize.value = parsed.readerFontSize ?? 100
+        readerBackground.value = parsed.readerBackground ?? 'default'
       } catch (e) {
         console.error('Failed to parse saved settings:', e)
       }
@@ -87,6 +105,9 @@ export const useSettingsStore = defineStore('settings', () => {
       limitSearchResults: limitSearchResults.value,
       searchResultsLimit: searchResultsLimit.value,
       selectedLanguages: selectedLanguages.value,
+      readerFontFamily: readerFontFamily.value,
+      readerFontSize: readerFontSize.value,
+      readerBackground: readerBackground.value,
     }))
   }
 
@@ -103,6 +124,9 @@ export const useSettingsStore = defineStore('settings', () => {
     searchResultsLimit,
     selectedLanguages,
     isLoadingLanguages,
+    readerFontFamily,
+    readerFontSize,
+    readerBackground,
 
     // Derived
     languagesOptions,
@@ -115,6 +139,9 @@ export const useSettingsStore = defineStore('settings', () => {
     updateSelectedLanguages,
     toggleLanguage,
     setSelectedLanguages,
+    updateReaderFontFamily,
+    updateReaderFontSize,
+    updateReaderBackground,
     saveToStorage,
     initialize,
   }

@@ -8,7 +8,15 @@ const API_VERSION = process.env.VITE_API_VERSION || 'v1'
 const API_TARGET = API_VERSION === 'v2' ? 'http://localhost:3000' : 'http://localhost:8000'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === 'foliate-view',
+        },
+      },
+    }),
+  ],
   server: {
     port: 5173,
     proxy: {

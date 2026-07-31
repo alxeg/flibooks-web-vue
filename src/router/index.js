@@ -4,6 +4,8 @@ import SearchBookView from '../views/SearchBookView.vue'
 import SearchSeriesView from '../views/SearchSeriesView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import AuthorBooksView from '../views/AuthorBooksView.vue'
+import ReadBookView from '../views/ReadBookView.vue'
+import RecentsView from '../views/RecentsView.vue'
 import BookDetailsDialog from '../components/BookDetailsDialog.vue'
 
 const routes = [
@@ -36,6 +38,19 @@ const routes = [
     name: 'AuthorBooks',
     component: AuthorBooksView,
     props: true,
+  },
+  {
+    path: '/read',
+    name: 'ReadBook',
+    component: ReadBookView,
+    props: (route) => ({
+      bookId: route.query.bookId,
+    }),
+  },
+  {
+    path: '/recents',
+    name: 'Recents',
+    component: RecentsView,
   },
 ]
 

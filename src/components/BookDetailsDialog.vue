@@ -13,7 +13,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'close'])
+const emit = defineEmits(['update:modelValue', 'close', 'read'])
 
 const book = ref(null)
 const loading = ref(false)
@@ -92,6 +92,10 @@ const downloadFb2 = async () => {
   }
 }
 
+const readBook = () => {
+  window.open(`/read?bookId=${props.bookId}`, '_blank')
+}
+
 const downloadFile = (response, filename) => {
   const url = window.URL.createObjectURL(new Blob([response.data]))
   const link = document.createElement('a')
@@ -168,6 +172,13 @@ const handleClose = () => {
 
       <v-card-actions>
         <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="readBook"
+        >
+          Read
+        </v-btn>
         <v-btn
           color="primary"
           variant="outlined"

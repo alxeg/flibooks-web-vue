@@ -1,18 +1,58 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useSettingsStore } from '../stores/settings'
 import { useThemeStore } from '../stores/theme'
 import { storeToRefs } from 'pinia'
+import { detectAvailableFonts, canQueryLocalFonts, queryLocalFontFamilies } from '../utils/fonts'
 
 const settingsStore = useSettingsStore()
 const themeStore = useThemeStore()
-const { searchDeletedBooks, limitSearchResults, searchResultsLimit, selectedLanguages } = storeToRefs(settingsStore)
+const {
+  searchDeletedBooks,
+  limitSearchResults,
+  searchResultsLimit,
+  selectedLanguages,
+  readerFontFamily,
+  readerFontSize,
+  readerBackground,
+} = storeToRefs(settingsStore)
 
 const tempDeletedBooks = ref(false)
 const tempLimitSearchResults = ref(false)
 const tempSearchResultsLimit = ref(50)
 const tempLanguages = ref([])
 const tempTheme = ref('system')
+const tempReaderFontFamily = ref('default')
+const tempReaderFontSize = ref(100)
+const tempReaderBackground = ref('default')
+
+const detectedFonts = ref([])
+const detectingLocalFonts = ref(false)
+const canDetectLocalFonts = canQueryLocalFonts()
+
+const readerFontFamilyOptions = computed(() => [
+  { title: "Book's default", value: 'default' },
+  ...detectedFonts.value.map(font => ({ title: font, value: font })),
+])
+
+const detectLocalFonts = async () => {
+  detectingLocalFonts.value = true
+  try {
+    const families = await queryLocalFontFamilies()
+    detectedFonts.value = [...new Set([...detectedFonts.value, ...families])].sort((a, b) => a.localeCompare(b))
+  } catch (error) {
+    console.error('Failed to query local fonts:', error)
+  } finally {
+    detectingLocalFonts.value = false
+  }
+}
+
+const readerBackgroundOptions = [
+  { title: "Book's default", value: 'default' },
+  { title: 'White', value: 'white' },
+  { title: 'Sepia', value: 'sepia' },
+  { title: 'Dark', value: 'dark' },
+]
 
 onMounted(() => {
   tempDeletedBooks.value = searchDeletedBooks.value
@@ -20,6 +60,11 @@ onMounted(() => {
   tempSearchResultsLimit.value = searchResultsLimit.value
   tempLanguages.value = [...selectedLanguages.value]
   tempTheme.value = themeStore.theme
+  tempReaderFontFamily.value = readerFontFamily.value
+  tempReaderFontSize.value = readerFontSize.value
+  tempReaderBackground.value = readerBackground.value
+
+  detectedFonts.value = detectAvailableFonts()
 })
 
 watch(tempDeletedBooks, (val) => {
@@ -44,6 +89,21 @@ watch(tempLanguages, (langs) => {
 
 watch(tempTheme, (val) => {
   themeStore.setTheme(val)
+})
+
+watch(tempReaderFontFamily, (val) => {
+  settingsStore.updateReaderFontFamily(val)
+  settingsStore.saveToStorage()
+})
+
+watch(tempReaderFontSize, (val) => {
+  settingsStore.updateReaderFontSize(val)
+  settingsStore.saveToStorage()
+})
+
+watch(tempReaderBackground, (val) => {
+  settingsStore.updateReaderBackground(val)
+  settingsStore.saveToStorage()
 })
 </script>
 
@@ -106,6 +166,53 @@ watch(tempTheme, (val) => {
           min="1"
           style="width: 120px"
         ></v-text-field>
+      </v-card-text>
+    </v-card>
+
+    <!-- Reading Preferences -->
+    <v-card class="mb-4">
+      <v-card-title class="text-subtitle-1 mb-2">
+        Reading
+      </v-card-title>
+      <v-card-text>
+        <v-combobox
+          v-model="tempReaderFontFamily"
+          :items="readerFontFamilyOptions"
+          item-title="title"
+          item-value="value"
+          :return-object="false"
+          label="Font"
+          variant="outlined"
+          density="compact"
+          class="mb-1"
+        ></v-combobox>
+        <div class="mb-2">
+          <v-btn
+            v-if="canDetectLocalFonts"
+            variant="text"
+            size="small"
+            :loading="detectingLocalFonts"
+            @click="detectLocalFonts"
+          >
+            Detect all fonts installed on this device
+          </v-btn>
+        </div>
+        <v-select
+          v-model="tempReaderBackground"
+          :items="readerBackgroundOptions"
+          label="Background"
+          variant="outlined"
+          density="compact"
+          class="mb-2"
+        ></v-select>
+        <div class="text-body-2 mb-1">Font size: {{ tempReaderFontSize }}%</div>
+        <v-slider
+          v-model="tempReaderFontSize"
+          min="70"
+          max="200"
+          step="10"
+          thumb-label
+        ></v-slider>
       </v-card-text>
     </v-card>
 

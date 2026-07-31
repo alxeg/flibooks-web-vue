@@ -17,13 +17,16 @@ const activeTab = computed({
     if (route.path === '/search/author') return 0
     if (route.path === '/search/book') return 1
     if (route.path === '/search/series') return 2
+    if (route.path === '/recents') return 3
     if (route.path === '/settings') return 'settings'
     return 0
   },
   set: (value) => {
     if (value === 'settings') {
       router.push('/settings')
-    } else {
+    } else if (value === 3) {
+      router.push('/recents')
+    } else if (typeof value === 'number' && value >= 0 && value <= 2) {
       const paths = ['/search/author', '/search/book', '/search/series']
       router.push(paths[value])
     }
@@ -34,6 +37,7 @@ const tabs = [
   { title: 'By Author', value: 0 },
   { title: 'By Title & Author', value: 1 },
   { title: 'By Series', value: 2 },
+  { title: 'Recents', value: 3 },
   { title: 'Settings', value: 'settings' },
 ]
 
@@ -49,7 +53,10 @@ const apiVersion = import.meta.env.VITE_API_VERSION || 'v1'
     </v-app-bar>
 
     <v-main>
-      <v-container class="py-8">
+      <div v-if="route.path === '/read'" class="read-main">
+        <router-view />
+      </div>
+      <v-container v-else class="py-8">
         <v-row>
           <v-col cols="12">
             <div class="d-flex align-center">
@@ -58,6 +65,7 @@ const apiVersion = import.meta.env.VITE_API_VERSION || 'v1'
                 background-color="secondary"
                 color="primary"
                 slider-color="primary"
+                :mandatory="false"
               >
                 <v-tab
                   v-for="tab in tabs.filter(t => t.value !== 'settings')"
@@ -75,6 +83,7 @@ const apiVersion = import.meta.env.VITE_API_VERSION || 'v1'
                 background-color="secondary"
                 color="primary"
                 slider-color="primary"
+                :mandatory="false"
               >
                 <v-tab
                   value="settings"
@@ -97,5 +106,11 @@ const apiVersion = import.meta.env.VITE_API_VERSION || 'v1'
 body {
   margin: 0;
   padding: 0;
+}
+
+.read-main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 </style>
