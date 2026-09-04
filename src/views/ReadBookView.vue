@@ -43,6 +43,13 @@ const bookData = ref(null)
 const foliateView = ref(null)
 const loading = ref(true)
 const canGoBack = ref(false)
+const toc = ref([])
+const tocOpen = ref(false)
+
+const flattenToc = (items, depth = 0) => (items || []).flatMap(item => [
+  { label: item.label, href: item.href, depth },
+  ...flattenToc(item.subitems, depth + 1),
+])
 
 const readViewStyle = computed(() => {
   const preset = BACKGROUND_PRESETS[readerBackground.value]
@@ -73,7 +80,7 @@ const addToRecents = () => {
   try {
     const recents = JSON.parse(localStorage.getItem('flibooks-recents') || '[]')
     const existingIndex = recents.findIndex(item => item.id === bookId.value)
-    
+
     const bookDataFull = {
       id: bookId.value,
       title: bookData.value.title,
@@ -83,13 +90,13 @@ const addToRecents = () => {
       lastRead: Date.now(),
       progress: null,
     }
-    
+
     if (existingIndex !== -1) {
       recents[existingIndex] = bookDataFull
     } else {
       recents.push(bookDataFull)
     }
-    
+
     localStorage.setItem('flibooks-recents', JSON.stringify(recents))
   } catch (error) {
     console.error('Failed to add to recents:', error)
@@ -98,6 +105,9 @@ const addToRecents = () => {
 
 const loadBookWithFoliate = async () => {
   if (!foliateView.value) return
+
+  toc.value = []
+  tocOpen.value = false
 
   try {
     const response = await downloadBook(bookId.value, 'fb2')
@@ -108,6 +118,7 @@ const loadBookWithFoliate = async () => {
     const view = foliateView.value
     await view.open(file)
     applyReaderStyles()
+    toc.value = flattenToc(view.book?.toc)
 
     const savedProgress = getSavedProgress()
     await view.init({ lastLocation: savedProgress?.cfi, showTextStart: true })
@@ -137,7 +148,26 @@ const goNext = () => {
   foliateView.value?.goRight()
 }
 
+const toggleToc = () => {
+  tocOpen.value = !tocOpen.value
+}
+
+const closeToc = () => {
+  tocOpen.value = false
+}
+
+const selectTocItem = (item) => {
+  if (item.href != null) {
+    foliateView.value?.goTo(item.href)
+  }
+  closeToc()
+}
+
 const handleKeydown = (event) => {
+  if (tocOpen.value) {
+    if (event.key === 'Escape') closeToc()
+    return
+  }
   if (event.key === 'ArrowLeft') goPrev()
   else if (event.key === 'ArrowRight') goNext()
 }
@@ -171,7 +201,7 @@ const saveProgress = (cfi) => {
       savedAt: Date.now(),
     }
     localStorage.setItem(`flibooks-progress-${bookId.value}`, JSON.stringify(progressData))
-    
+
     updateRecentsProgress(progressData)
   } catch (error) {
     console.error('Failed to save progress:', error)
@@ -259,6 +289,41 @@ watch([readerFontFamily, readerFontSize, readerBackground], applyReaderStyles)
       variant="tonal"
       @click="goNext"
     ></v-btn>
+
+    <v-btn
+      v-if="!loading && toc.length"
+      icon="mdi-format-list-bulleted"
+      class="toc-button"
+      variant="tonal"
+      title="Table of contents"
+      @click="toggleToc"
+    ></v-btn>
+
+    <template v-if="tocOpen">
+      <div class="toc-backdrop" @click="closeToc"></div>
+      <div class="toc-popup bg-surface elevation-8">
+        <div class="toc-header bg-surface">
+          <span class="text-subtitle-1 font-weight-bold text-truncate text-on-surface">{{ bookData?.title }}</span>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            title="Close"
+            @click="closeToc"
+          ></v-btn>
+        </div>
+        <v-list density="compact" nav class="toc-list">
+          <v-list-item
+            v-for="(item, i) in toc"
+            :key="i"
+            :title="item.label"
+            :style="{ paddingLeft: `${16 + item.depth * 16}px` }"
+            link
+            @click="selectTocItem(item)"
+          ></v-list-item>
+        </v-list>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -303,5 +368,48 @@ watch([readerFontFamily, readerFontSize, readerBackground], applyReaderStyles)
   top: 8px;
   left: 8px;
   z-index: 1;
+}
+
+.toc-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.toc-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.toc-popup {
+  position: absolute;
+  top: 56px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  width: 90%;
+  min-width: 280px;
+  max-width: calc(100vw - 16px);
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+@media (orientation: landscape) {
+  .toc-popup {
+    width: 50%;
+  }
+}
+
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
 }
 </style>
