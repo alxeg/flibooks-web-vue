@@ -71,6 +71,14 @@ export const downloadBook = async (bookId, format = 'fb2') => {
   return response
 }
 
+// Download book by library id (v2 only)
+export const downloadBookByLibId = async (libId) => {
+  const response = await api.get(`/book/lib/${libId}/download`, {
+    responseType: 'blob',
+  })
+  return response
+}
+
 // Download books archive
 export const downloadBooksArchive = async (bookIds) => {
   const response = await api.get('/book/archive', {

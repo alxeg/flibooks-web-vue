@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getBook, downloadBook } from '../api'
+import { API_VERSION, getBook, downloadBook, downloadBookByLibId } from '../api'
 import { useSettingsStore } from '../stores/settings'
 import { storeToRefs } from 'pinia'
 import 'foliate-js/view.js'
@@ -83,6 +83,7 @@ const addToRecents = () => {
 
     const bookDataFull = {
       id: bookId.value,
+      libId: bookData.value.lib_id || null,
       title: bookData.value.title,
       authors: bookData.value.authors,
       series: bookData.value.series,
@@ -110,8 +111,11 @@ const loadBookWithFoliate = async () => {
   tocOpen.value = false
 
   try {
-    const response = await downloadBook(bookId.value, 'fb2')
-    const file = new File([response.data], `${bookId.value}.fb2`, {
+    const libId = bookData.value?.lib_id
+    const response = (API_VERSION === 'v2' && libId)
+      ? await downloadBookByLibId(libId)
+      : await downloadBook(bookId.value, 'fb2')
+    const file = new File([response.data], `${libId || bookId.value}.fb2`, {
       type: 'application/x-fictionbook+xml',
     })
 
