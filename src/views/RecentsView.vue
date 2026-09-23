@@ -17,6 +17,7 @@ const loadRecents = async () => {
           const book = await getBook(item.id)
           books.push({
             ...book,
+            libId: item.libId || book.lib_id || null,
             lastRead: item.lastRead,
             progress: item.progress,
           })
@@ -34,18 +35,20 @@ const loadRecents = async () => {
 }
 
 const openBook = (book) => {
-  window.open(`/read?bookId=${book.id}`, '_blank')
+  const libId = book.libId || book.lib_id
+  window.open(`/read?bookId=${book.id}${libId ? `&libId=${libId}` : ''}`, '_blank')
 }
 
-const removeBook = (bookId, event) => {
+const removeBook = (book, event) => {
   event.stopPropagation()
   try {
     const saved = localStorage.getItem('flibooks-recents')
     if (saved) {
       const recentsList = JSON.parse(saved)
-      const filtered = recentsList.filter(item => item.id !== bookId)
+      const filtered = recentsList.filter(item => item.id !== book.id)
       localStorage.setItem('flibooks-recents', JSON.stringify(filtered))
-      localStorage.removeItem(`flibooks-progress-${bookId}`)
+      localStorage.removeItem(`flibooks-progress-${book.libId || book.lib_id || book.id}`)
+      localStorage.removeItem(`flibooks-progress-${book.id}`)
       loadRecents()
     }
   } catch (error) {
@@ -122,7 +125,7 @@ onMounted(() => {
                     icon="mdi-delete"
                     variant="text"
                     size="small"
-                    @click.stop="removeBook(book.id, $event)"
+                    @click.stop="removeBook(book, $event)"
                   ></v-btn>
                 </v-col>
               </v-row>

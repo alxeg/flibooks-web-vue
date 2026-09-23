@@ -39,6 +39,7 @@ const settingsStore = useSettingsStore()
 const { readerFontFamily, readerFontSize, readerBackground } = storeToRefs(settingsStore)
 
 const bookId = ref(route.query.bookId)
+const libId = ref(route.query.libId || null)
 const bookData = ref(null)
 const foliateView = ref(null)
 const loading = ref(true)
@@ -67,10 +68,22 @@ const applyReaderStyles = () => {
 const loadBookData = async () => {
   try {
     bookData.value = await getBook(bookId.value)
-    await loadBookWithFoliate()
-    addToRecents()
   } catch (error) {
     console.error('Failed to load book data:', error)
+  }
+
+  libId.value = libId.value || bookData.value?.lib_id || null
+
+  if (!bookData.value && !libId.value) {
+    loading.value = false
+    return
+  }
+
+  try {
+    await loadBookWithFoliate()
+    if (bookData.value) {
+      addToRecents()
+    }
   } finally {
     loading.value = false
   }
@@ -83,7 +96,7 @@ const addToRecents = () => {
 
     const bookDataFull = {
       id: bookId.value,
-      libId: bookData.value.lib_id || null,
+      libId: libId.value || bookData.value.lib_id || null,
       title: bookData.value.title,
       authors: bookData.value.authors,
       series: bookData.value.series,
@@ -111,11 +124,10 @@ const loadBookWithFoliate = async () => {
   tocOpen.value = false
 
   try {
-    const libId = bookData.value?.lib_id
-    const response = (API_VERSION === 'v2' && libId)
-      ? await downloadBookByLibId(libId)
+    const response = (API_VERSION === 'v2' && libId.value)
+      ? await downloadBookByLibId(libId.value)
       : await downloadBook(bookId.value, 'fb2')
-    const file = new File([response.data], `${libId || bookId.value}.fb2`, {
+    const file = new File([response.data], `${libId.value || bookId.value}.fb2`, {
       type: 'application/x-fictionbook+xml',
     })
 
@@ -180,9 +192,13 @@ const handleLoad = ({ detail: { doc } }) => {
   doc.addEventListener('keydown', handleKeydown)
 }
 
+const progressKey = computed(() => `flibooks-progress-${libId.value || bookData.value?.lib_id || bookId.value}`)
+const legacyProgressKey = computed(() => `flibooks-progress-${bookId.value}`)
+
 const getSavedProgress = () => {
   try {
-    const saved = localStorage.getItem(`flibooks-progress-${bookId.value}`)
+    const saved = localStorage.getItem(progressKey.value)
+      || localStorage.getItem(legacyProgressKey.value)
     if (saved) {
       return JSON.parse(saved)
     }
@@ -204,7 +220,10 @@ const saveProgress = (cfi) => {
       cfi: cfi,
       savedAt: Date.now(),
     }
-    localStorage.setItem(`flibooks-progress-${bookId.value}`, JSON.stringify(progressData))
+    if (progressKey.value !== legacyProgressKey.value) {
+      localStorage.removeItem(legacyProgressKey.value)
+    }
+    localStorage.setItem(progressKey.value, JSON.stringify(progressData))
 
     updateRecentsProgress(progressData)
   } catch (error) {
@@ -247,9 +266,10 @@ onUnmounted(() => {
   handleBeforeUnload()
 })
 
-watch(() => route.query.bookId, async (newId) => {
+watch(() => [route.query.bookId, route.query.libId], async ([newId, newLibId]) => {
   if (newId) {
     bookId.value = newId
+    libId.value = newLibId || null
     await loadBookData()
   }
 })

@@ -93,7 +93,8 @@ const downloadFb2 = async () => {
 }
 
 const readBook = () => {
-  window.open(`/read?bookId=${props.bookId}`, '_blank')
+  const libId = book.value?.lib_id
+  window.open(`/read?bookId=${props.bookId}${libId ? `&libId=${libId}` : ''}`, '_blank')
 }
 
 const downloadFile = (response, filename) => {
